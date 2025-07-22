@@ -10,7 +10,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Optional - Clone PDF template from external repo
+   #   - name: Optional - Clone PDF template from external repo
         # Uncomment and edit if you want to use a template from another repo
         # uses: actions/checkout@v4
         # with:
